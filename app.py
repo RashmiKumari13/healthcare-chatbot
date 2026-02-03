@@ -73,15 +73,6 @@ if st.session_state.step >= 5:
 
 if st.session_state.show_report:
     st.markdown("## 🏥 Your Report")
-    st.write(generate_summary(st.session_state.patient_data))
-
-
-if st.session_state.step >= 5:
-    if st.button("📄 Generate Report"):
-        st.session_state.show_report = True
-
-if st.session_state.show_report:
-    st.markdown("## 🏥 Your Report")
     report_text = generate_summary(st.session_state.patient_data)
     st.write(report_text)
 
