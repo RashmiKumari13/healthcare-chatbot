@@ -1,5 +1,6 @@
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from typing import Optional, Dict, Any
+import pandas as pd
 
 @dataclass
 class PatientData:
@@ -9,8 +10,30 @@ class PatientData:
     duration: str = "N/A"
     notes: str = "None provided"
 
+def load_symptom_faq():
+    """Load symptom database from CSV"""
+    try:
+        return pd.read_csv("data/symptoms_faq.csv")
+    except:
+        return None
+
+def get_symptom_info(symptom: str):
+    """Fetch symptom info and recommendation from CSV"""
+    df = load_symptom_faq()
+    if df is None:
+        return None, None
+
+    symptom = symptom.lower().strip()
+
+    match = df[df["symptom"].str.contains(symptom, case=False, na=False)]
+    if not match.empty:
+        info = match.iloc[0]["info"]
+        recommendation = match.iloc[0]["recommendation"]
+        return info, recommendation
+
+    return None, None
+
 def validate_severity(value: Any) -> Optional[int]:
-    """Validate severity input (must be between 1 and 10)."""
     try:
         value = int(value)
         if 1 <= value <= 10:
@@ -20,10 +43,6 @@ def validate_severity(value: Any) -> Optional[int]:
     return None
 
 def generate_summary(data: Dict[str, Any]) -> str:
-    """
-    Takes a dictionary of patient data and returns a professional medical-style report.
-    """
-
     patient = PatientData(
         name=data.get("name", "N/A"),
         reason=data.get("reason", "N/A"),
@@ -38,45 +57,55 @@ def generate_summary(data: Dict[str, Any]) -> str:
         else "Not specified"
     )
 
-    summary = f"""
-    ==========================================
-            🏥 PATIENT PRE-VISIT REPORT
-    ==========================================
+    # Get symptom info from CSV
+    info, recommendation = get_symptom_info(patient.reason)
 
+    info_text = info if info else "Not available in database."
+    reco_text = recommendation if recommendation else "Consult a doctor if symptoms persist."
+
+    summary = f"""
+    🏥 **PATIENT PRE-VISIT REPORT**
+    --------------------------------
     👤 Patient Name      : {patient.name}
     🩺 Primary Concern   : {patient.reason}
+    ℹ️ Symptom Info      : {info_text}
     ⚠️ Severity Level    : {severity_display}
     ⏳ Duration          : {patient.duration}
     📝 Additional Notes : {patient.notes}
 
-    ------------------------------------------
+    ✅ Basic Recommendation:
+    {reco_text}
+
     ⚠️ DISCLAIMER:
-    This is a preliminary AI-generated summary 
-    and does NOT replace a professional medical diagnosis.
-    Please consult a licensed healthcare provider.
-    ------------------------------------------
+    This is a preliminary AI-generated summary and does NOT replace a professional medical diagnosis.
     """
 
     return summary.strip()
 
-def get_questionnaire() -> Dict[int, str]:
-    """
-    Returns structured questionnaire — easy to modify or expand.
-    """
+def get_questionnaire():
     return {
-        0: "Hello! I'm HealthAssist. To start, what is your **full name**?",
-        1: "In a few words, what is the **primary reason** for your visit?",
+        0: "Hello! I'm HealthAssist. What is your **full name**?",
+        1: "What is your **primary symptom or reason** for visiting?",
         2: "On a scale of **1 to 10**, how severe is this discomfort?",
         3: "How many **days** has this been bothering you?",
-        4: "Are there any **other symptoms or allergies** you'd like the doctor to know about?"
+        4: "Any **other symptoms or allergies**?"
     }
 
 def get_next_question(current_step: int) -> str:
-    """
-    Determines the next question based on conversation step.
-    """
     questions = get_questionnaire()
     return questions.get(
         current_step,
-        "Thank you! I have all the info. Would you like me to generate your report?"
+        "Thanks! Click **Generate Report** when you're ready."
     )
+
+def get_dynamic_question(symptom):
+    symptom = symptom.lower()
+
+    if "body ache" in symptom:
+        return "Is the pain in your whole body or a specific area?"
+    elif "fever" in symptom:
+        return "What is your current body temperature?"
+    elif "headache" in symptom:
+        return "Is it mild, moderate, or severe?"
+    else:
+        return "Can you describe this symptom in more detail?"

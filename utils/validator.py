@@ -19,6 +19,13 @@ def check_emergency(user_input):
             return True, "🚨 **EMERGENCY:** Your symptoms may require immediate medical attention. Please call 911 or go to the nearest emergency room."
             
     return False, "YOU are fine!"
+def get_dynamic_question(symptom):
+    if "body ache" in symptom.lower():
+        return "Is the pain in your whole body or a specific area?"
+    elif "fever" in symptom.lower():
+        return "What is your current body temperature?"
+    else:
+        return "Can you describe your symptom in more detail?"
 
 def validate_severity(user_input):
     """
