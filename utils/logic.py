@@ -111,17 +111,18 @@ def get_dynamic_question(symptom):
         return "Can you describe this symptom in more detail?"
 
 
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.cidfonts import UnicodeCIDFont
-
 # Register font (required for PDF text)
 pdfmetrics.registerFont(UnicodeCIDFont("STSong-Light"))
 
 def generate_pdf_report(data, filename="healthassist_report.pdf"):
-    file_path = f"/mnt/data/{filename}"
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 
+    pdfmetrics.registerFont(UnicodeCIDFont("STSong-Light"))
+
+    file_path = f"/mnt/data/{filename}"
     summary_text = generate_summary(data)
 
     doc = SimpleDocTemplate(file_path)
