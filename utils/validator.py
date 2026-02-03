@@ -18,7 +18,7 @@ def check_emergency(user_input):
         if flag in user_input_clean:
             return True, "🚨 **EMERGENCY:** Your symptoms may require immediate medical attention. Please call 911 or go to the nearest emergency room."
             
-    return False, ""
+    return False, "YOU are fine!"
 
 def validate_severity(user_input):
     """
