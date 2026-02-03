@@ -35,6 +35,7 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # User Input
+# User Input
 if prompt := st.chat_input("Type here..."):
     is_emergency, warning = check_emergency(prompt)
 
@@ -47,14 +48,18 @@ if prompt := st.chat_input("Type here..."):
         current_key = steps[st.session_state.step]
         st.session_state.patient_data[current_key] = prompt
 
-        # If symptom entered, give extra helpful info
-        if st.session_state.step == 1:  # After reason
+        # If this is the symptom step (reason)
+        if st.session_state.step == 1:
             info, reco = get_symptom_info(prompt)
             if info:
                 response = f"ℹ️ **About this symptom:** {info}\n\n"
                 response += get_dynamic_question(prompt)
             else:
                 response = get_dynamic_question(prompt)
+
+            # ✅ IMPORTANT FIX — move to next step after asking follow-up
+            st.session_state.step += 1
+
         else:
             st.session_state.step += 1
             if st.session_state.step < len(steps):
@@ -65,6 +70,7 @@ if prompt := st.chat_input("Type here..."):
     st.session_state.messages.append({"role": "assistant", "content": response})
     with st.chat_message("assistant"):
         st.markdown(response)
+
 
 # Generate Report Button
 if st.session_state.step >= 5:
@@ -79,10 +85,10 @@ if st.session_state.show_report:
     # Create and provide PDF download
     pdf_path = generate_pdf_report(st.session_state.patient_data)
 
-    with open(pdf_path, "rb") as f:
+    with open(file_path, "rb") as f:
         st.download_button(
             label="⬇️ Download PDF Report",
             data=f,
             file_name="healthassist_report.pdf",
             mime="application/pdf"
-        )
+    )

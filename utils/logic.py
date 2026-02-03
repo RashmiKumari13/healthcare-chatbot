@@ -1,6 +1,11 @@
 from dataclasses import dataclass
 from typing import Optional, Dict, Any
 import pandas as pd
+import os
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 
 @dataclass
 class PatientData:
@@ -110,22 +115,31 @@ def get_dynamic_question(symptom):
         return "Can you describe this symptom in more detail?"
 
 # ---------- PDF FUNCTION (LAZY IMPORT — SAFE) ----------
-def generate_pdf_report(data, filename="healthassist_report.pdf"):
-    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-    from reportlab.lib.styles import getSampleStyleSheet
-    from reportlab.pdfbase import pdfmetrics
-    from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 
+def generate_pdf_report(data):
     pdfmetrics.registerFont(UnicodeCIDFont("STSong-Light"))
 
-    file_path = f"/mnt/data/{filename}"
-    summary_text = generate_summary(data)
+    # ✅ Save inside your project folder instead of /mnt/data/
+    file_path = os.path.join(os.getcwd(), "healthassist_report.pdf")
 
     doc = SimpleDocTemplate(file_path)
     styles = getSampleStyleSheet()
     story = []
 
-    for line in summary_text.split("\n"):
+    content = f"""
+    PATIENT PRE-VISIT REPORT
+
+    Patient Name: {data.get('name','N/A')}
+    Primary Concern: {data.get('reason','N/A')}
+    Severity Level: {data.get('severity','N/A')}/10
+    Duration: {data.get('duration','N/A')}
+    Additional Notes: {data.get('notes','None')}
+
+    Disclaimer:
+    This is a preliminary AI-generated report and does not replace professional medical advice.
+    """
+
+    for line in content.strip().split("\n"):
         story.append(Paragraph(line, styles["BodyText"]))
         story.append(Spacer(1, 6))
 
