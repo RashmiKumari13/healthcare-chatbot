@@ -109,3 +109,28 @@ def get_dynamic_question(symptom):
         return "Is it mild, moderate, or severe?"
     else:
         return "Can you describe this symptom in more detail?"
+
+
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.cidfonts import UnicodeCIDFont
+
+# Register font (required for PDF text)
+pdfmetrics.registerFont(UnicodeCIDFont("STSong-Light"))
+
+def generate_pdf_report(data, filename="healthassist_report.pdf"):
+    file_path = f"/mnt/data/{filename}"
+
+    summary_text = generate_summary(data)
+
+    doc = SimpleDocTemplate(file_path)
+    styles = getSampleStyleSheet()
+    story = []
+
+    for line in summary_text.split("\n"):
+        story.append(Paragraph(line, styles["BodyText"]))
+        story.append(Spacer(1, 6))
+
+    doc.build(story)
+    return file_path
