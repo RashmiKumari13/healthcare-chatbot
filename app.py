@@ -80,15 +80,15 @@ if st.session_state.step >= 5:
 if st.session_state.show_report:
     st.markdown("## 🏥 Your Report")
     report_text = generate_summary(st.session_state.patient_data)
-    st.write(report_text)
+    st.markdown(report_text)
 
     # Create and provide PDF download
     pdf_path = generate_pdf_report(st.session_state.patient_data)
 
-    with open(file_path, "rb") as f:
+    with open(pdf_path, "rb") as f:
         st.download_button(
             label="⬇️ Download PDF Report",
             data=f,
             file_name="healthassist_report.pdf",
             mime="application/pdf"
-    )
+        )
