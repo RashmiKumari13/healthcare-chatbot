@@ -57,7 +57,6 @@ def generate_summary(data: Dict[str, Any]) -> str:
         else "Not specified"
     )
 
-    # Get symptom info from CSV
     info, recommendation = get_symptom_info(patient.reason)
 
     info_text = info if info else "Not available in database."
@@ -110,10 +109,7 @@ def get_dynamic_question(symptom):
     else:
         return "Can you describe this symptom in more detail?"
 
-
-# Register font (required for PDF text)
-pdfmetrics.registerFont(UnicodeCIDFont("STSong-Light"))
-
+# ---------- PDF FUNCTION (LAZY IMPORT — SAFE) ----------
 def generate_pdf_report(data, filename="healthassist_report.pdf"):
     from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
     from reportlab.lib.styles import getSampleStyleSheet
